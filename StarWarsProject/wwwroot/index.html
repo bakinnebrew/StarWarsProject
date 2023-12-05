@@ -1,0 +1,97 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Galaxy Manufacturers Guide</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <div id="manufacturers-guide">
+        <h1>Galaxy Manufacturers Guide</h1>
+            <div>
+                <select id="manufacturers-dropdown">
+                    <option value="All"> All </option>
+                </select>
+            </div>
+        <ul id="starshipList"></ul>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            var manufacturer = "All";
+            getStarships(manufacturer);
+        });
+
+        function getStarships(manufacturer) {
+            console.log(`beginning getStartships(${manufacturer})`)
+            var starshipList = document.getElementById('starshipList');
+
+            //while (starshipList.firstChild) {
+            //    starshipList.removeChild(starshipList.firstChild)
+            //}
+            //console.log("DOM cleared");
+
+            var starshipArray = [];
+
+            fetch(`/starships?manufacturer=${manufacturer}`)
+                .then(response => response.json())
+                .then(starships => {
+                    console.log(starships);
+
+                    while (starshipList.firstChild) {
+                        starshipList.removeChild(starshipList.firstChild)
+                    }
+                    console.log("DOM cleared");
+
+                    starships.forEach(starship => {
+                        starshipArray.push(starship);
+                        let listItem = document.createElement('li');
+                        listItem.textContent = starship.name;
+                        starshipList.appendChild(listItem);
+                    });
+
+                    generateManufacturerDropdown(starshipArray);
+                    
+                });
+
+        }
+        
+
+        function generateManufacturerDropdown(starshipArray) {
+            console.log("generating manufacturer dropdown");
+
+            console.log(starshipArray)
+            var uniqueManufacturers = [];
+
+            for (var i = 0; i < starshipArray.length; i++) {
+
+                if (!uniqueManufacturers.includes(starshipArray[i].manufacturer)) {
+                    uniqueManufacturers.push(starshipArray[i].manufacturer)
+                }
+            }
+      
+            console.log(`${uniqueManufacturers.length} unique manufacturer(s)`);
+
+            var manufacturersDropdown = document.getElementById('manufacturers-dropdown');
+
+            uniqueManufacturers.forEach(manufacturer => {
+                var dropdownItem = document.createElement('option');
+                dropdownItem.textContent = manufacturer;
+                dropdownItem.value = manufacturer;
+                manufacturersDropdown.appendChild(dropdownItem);
+            });
+
+            manufacturersDropdown.addEventListener('change', function () {
+                getStarships(this.value)
+            })
+        }
+
+    </script>
+</body>
+</html>
